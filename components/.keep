@@ -1,0 +1,2 @@
+import { aiUseChat } from '@ai-sdk/react'; // placeholder, useChat comes from 'ai/react'
+// Note: We'll create components in the next steps.
