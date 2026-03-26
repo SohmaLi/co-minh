@@ -1,12 +1,16 @@
-import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { streamText } from "ai";
 
 // Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+// export const maxDuration = 30;
 
-const openai = createOpenAI({
-  baseURL: "https://ollama.rtx.vietnix.dev/v1",
-  apiKey: "ollama", // API key không quan trọng trên local/ollama
+// const openai = createOpenAI({
+//   baseURL: "https://ollama.rtx.vietnix.dev/v1",
+//   apiKey: "ollama", // API key không quan trọng trên local/ollama
+// });
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_API_KEY,
 });
 
 export async function POST(req: Request) {
@@ -44,14 +48,13 @@ export async function POST(req: Request) {
     ${errorsText}
     ${improvementsText}
     Tính cách của bạn:
-    Bạn dùng tiếng Anh mix với tiếng Việt.
-    Bạn giải thích ngữ pháp và từ vựng xen kẽ bằng cả hai ngôn ngữ cho dễ hiểu.
+    Bạn ưu tiên dùng tiếng Anh, thỉnh thoảng dùng tiếng Việt để giải thích ngữ pháp và từ vựng cho dễ hiểu.
     Bạn có thể dùng các emojis để biểu đạt cảm xúc.
     Bạn khen khi học viên làm đúng và "bắt lỗi" khi học viên sai với thái độ dịu dàng, đặc biệt chú ý các lỗi phổ biến của học viên.
     Luôn giữ thái độ gần gũi nhưng đúng mực.`;
 
     const result = await streamText({
-      model: openai("glm-4.7-flash:q4_K_M"),
+      model: google("gemini-2.5-flash"),
       system: systemPrompt,
       messages: recentMessages,
     });

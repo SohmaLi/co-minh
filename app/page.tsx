@@ -1,15 +1,30 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Layout, Input, Button, Modal, Typography, Popconfirm } from "antd";
-import { SendOutlined, DeleteOutlined } from "@ant-design/icons";
-import Sidebar, { StudentProfile } from "@/components/Sidebar";
+import { Layout, Input, Button, Modal, Typography, Popconfirm, Popover, Select, Tag } from "antd";
+import { SendOutlined, DeleteOutlined, SettingOutlined } from "@ant-design/icons";
+import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
+const { TextArea } = Input;
 
-const SIDEBAR_WIDTH = 300;
+const SIDEBAR_WIDTH = 250;
+
+interface StudentProfile {
+  level: string;
+  commonErrors: string;
+  improvements: string;
+}
+
+const LEVELS = [
+  { value: "beginner", label: "🌱 Mới bắt đầu (A1-A2)" },
+  { value: "elementary", label: "📖 Sơ cấp (B1)" },
+  { value: "intermediate", label: "📚 Trung cấp (B2)" },
+  { value: "upper-intermediate", label: "🎓 Khá (C1)" },
+  { value: "advanced", label: "🏆 Nâng cao (C2)" },
+];
 
 interface Message {
   id: string;
@@ -161,9 +176,55 @@ export default function ChatPage() {
     }
   };
 
+  const profileContent = (
+    <div style={{ width: 300, padding: 8 }}>
+      <div style={{ marginBottom: 12 }}>
+        <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+          Trình độ
+        </Text>
+        <Select
+          value={profile.level}
+          onChange={(val) => setProfile({ ...profile, level: val })}
+          options={LEVELS}
+          style={{ width: "100%" }}
+          size="small"
+        />
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+          Lỗi hay mắc phải
+        </Text>
+        <TextArea
+          value={profile.commonErrors}
+          onChange={(e) => setProfile({ ...profile, commonErrors: e.target.value })}
+          placeholder="VD: nhầm lẫn thì, thiếu mạo từ..."
+          autoSize={{ minRows: 2, maxRows: 4 }}
+          size="small"
+          style={{ fontSize: 12 }}
+        />
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+          Điều cần cải thiện
+        </Text>
+        <TextArea
+          value={profile.improvements}
+          onChange={(e) => setProfile({ ...profile, improvements: e.target.value })}
+          placeholder="VD: phát âm, giao tiếp tự nhiên hơn..."
+          autoSize={{ minRows: 2, maxRows: 4 }}
+          size="small"
+          style={{ fontSize: 12 }}
+        />
+      </div>
+      <Tag color="blue" style={{ fontSize: 11, display: "block", textAlign: "center" }}>
+        Cô Minh sẽ dạy theo form này nhé!
+      </Tag>
+    </div>
+  );
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sidebar profile={profile} onProfileChange={setProfile} />
+      <Sidebar />
 
       <Layout style={{ marginLeft: SIDEBAR_WIDTH }}>
         <Content
@@ -191,25 +252,34 @@ export default function ChatPage() {
             <Text strong style={{ fontSize: 15 }}>
               🇬🇧 Cô Minh English {studentName && <Text type="secondary" style={{ fontSize: 13, fontWeight: 400 }}>— Học viên: {studentName}</Text>}
             </Text>
-            {messages.length > 0 && (
-              <Popconfirm
-                title="Xoá toàn bộ hội thoại?"
-                description="Lịch sử chat sẽ bị xoá và không thể khôi phục."
-                onConfirm={handleClearChat}
-                okText="Xoá"
-                cancelText="Huỷ"
-                okButtonProps={{ danger: true }}
+            {/* Right actions */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Popover 
+                content={profileContent} 
+                title={<div style={{ fontWeight: 600 }}>Cấu hình kiến thức</div>} 
+                trigger="click" 
+                placement="bottomRight"
               >
-                <Button
-                  icon={<DeleteOutlined />}
-                  size="small"
-                  type="text"
-                  danger
-                >
-                  Xoá hội thoại
+                <Button icon={<SettingOutlined />} size="small" type="dashed">
+                  Tuỳ chỉnh kiến thức
                 </Button>
-              </Popconfirm>
-            )}
+              </Popover>
+
+              {messages.length > 0 && (
+                <Popconfirm
+                  title="Xoá toàn bộ hội thoại?"
+                  description="Lịch sử chat sẽ bị xoá và không thể khôi phục."
+                  onConfirm={handleClearChat}
+                  okText="Xoá"
+                  cancelText="Huỷ"
+                  okButtonProps={{ danger: true }}
+                >
+                  <Button icon={<DeleteOutlined />} size="small" type="text" danger>
+                    Xoá hội thoại
+                  </Button>
+                </Popconfirm>
+              )}
+            </div>
           </div>
 
           {/* Chat Messages */}
